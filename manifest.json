@@ -2,13 +2,25 @@
   "name": "AMQ Tracker",
   "version": "0.0",
   "description": "Track AMQ stats",
-  "permissions": ["storage"],
+  "browser_action": {
+    "default_title": "AMQ Tracker",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
   "background": {
-    "script": [
-      "tracker.js",
-      "jquery-3.1.1.min.js"
+    "scripts": [
+      "background.js"
     ],
     "persistent": false
   },
+  "content_scripts": [
+    {
+      "matches": ["https://animemusicquiz.com/*"],
+      "js": ["tracker_listener.js", "jquery-3.1.1.min.js"]
+    }
+  ],
   "manifest_version": 2
 }
