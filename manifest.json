@@ -1,0 +1,14 @@
+{
+  "name": "AMQ Tracker",
+  "version": "0.0",
+  "description": "Track AMQ stats",
+  "permissions": ["storage"],
+  "background": {
+    "script": [
+      "tracker.js",
+      "jquery-3.1.1.min.js"
+    ],
+    "persistent": false
+  },
+  "manifest_version": 2
+}
