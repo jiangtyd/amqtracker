@@ -1,5 +1,6 @@
 let extensionEnabled = false;
 let answerCheckObserver = undefined;
+let username = "druggedfoxjr";
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -41,6 +42,11 @@ const getClassChangeObserver = function(classname_regex, callback) {
 
 const checkCallback = function() {
   console.log("checking answers!");
+  let songInfo = getSongInfo();
+  let checkedAnswer = checkAnswer(username);
+  console.log("song info: " + JSON.stringify(songInfo));
+  console.log("checkedAnswer: " + JSON.stringify(checkedAnswer));
+  chrome.runtime.sendMessage({"cmd": "checkAnswer", "songInfo": songInfo, "checkedAnswer": checkedAnswer});
 }
 
 const bindCheckAnswerObserver = function() {
@@ -77,23 +83,32 @@ const NO_USER = "No such user in game";
 const NO_GUESS = "No guess yet";
 
 const checkAnswer = function(username) {
-  let answer = $("#qpAvatar-" + username);
+  let avatarRow = $("#qpAvatarRow");
+  let result = {"error": NO_USER};
 
-  if (answer.length == 0) {
-    return {"error": NO_USER};
-  }
+  // iterate and filter for now
+  avatarRow.children(".qpAvatarContainer").each(function() {
+    let answer = $(this);
+    let user = answer.find(".qpAvatarNameContainer").first().text().trim();
+    if (user === username) {
+      let guess = answer.find(".qpAvatarAnswerText").text();
+      let isCorrect = answer.find(".qpAvatarAnswerContainer").hasClass("rightAnswer");
+      let isIncorrect = answer.find(".qpAvatarAnswerContainer").hasClass("wrongAnswer");
 
-  let guess = answer.find(".qpAvatarAnswerText").text();
-  let isCorrect = answer.find(".qpAvatarAnswerContainer").hasClass("rightAnswer");
-  let isIncorrect = answer.find(".qpAvatarAnswerContainer").hasClass("wrongAnswer");
+      if (!isCorrect && !isIncorrect) {
+        result = {"error": NO_GUESS};
+        return false;
+      } else {
+        result = {
+          "guess": guess,
+          // believe wrongAnswer first, just in case weird things happen
+          "isCorrect": !isIncorrect
+        };
+        return false;
+      }
+    }
 
-  if (!isCorrect && !isIncorrect) {
-    return {"error": NO_GUESS};
-  } else {
-    return {
-      "guess": guess,
-      // believe wrongAnswer first, just in case weird things happen
-      "isCorrect": !isIncorrect
-    };
-  }
+  })
+
+  return result;
 };
